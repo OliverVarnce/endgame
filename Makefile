@@ -4,9 +4,10 @@ SRCS = 	src/*.c
 
 INC = 	inc/header.h
 
-LIBS =  `src/sdl/bin/sdl2-config --libs`
+SDL =   -F inc/framework -I inc/framework/SDL2.framework/SDL2
 
-CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic 
+CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic \
+	 	 -rpath inc/framework -framework SDL2 
 all: $(NAME)
 
 $(NAME): install clean
@@ -14,7 +15,7 @@ $(NAME): install clean
 install:
 	@cp $(SRCS) .
 	@cp $(INC) .
-	@clang $(CFLAGS) -o $(NAME) $(SRCS) -O3 `src/sdl/bin/sdl2-config --cflags` $(LIBS)
+	@clang $(CFLAGS) -o $(NAME) $(SRCS) $(LIBS) $(SDL)
 
 
 uninstall: clean

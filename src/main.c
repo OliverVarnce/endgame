@@ -6,6 +6,9 @@
 #include "player.h"
 #include "asteroids.h"
 
+#define WIDTH 800
+#define HEIGHT 600
+
 #define ASTEROIDS 27
 #define LIVES 3
 
@@ -23,11 +26,38 @@ struct player lives[LIVES];			//Player lives left
     
 int main () {
 
-	//SDL Window setup
-	if (init(SCREEN_WIDTH, SCREEN_HEIGHT) == 1) {
+	// variable declarations
+	SDL_Window *win = NULL;
+	SDL_Renderer *renderer = NULL;
+	SDL_Texture *img = NULL;
+	int w, h; // texture width & height
+
+	//Initialize SDL
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+
+		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		
-		return 0;
+		return 1;
 	}
+
+/////////////////////
+
+	
+	win = SDL_CreateWindow("Image Loading", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+	renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
+	img = IMG_LoadTexture(renderer, "./resources/1.png");
+	screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	SDL_QueryTexture(img, NULL, NULL, &w, &h);
+
+	SDL_Rect texr; texr.x = WIDTH/2; texr.y = HEIGHT/2; texr.w = w/2; texr.h = h/2; 
+	
+//allocate pixel buffer
+	pixels = (Uint32*) malloc((SCREEN_WIDTH * SCREEN_HEIGHT) * sizeof(Uint32));
+	
+	
+
+//////////////////	
 
 	int i = 0;
 	int j = 0;
@@ -67,6 +97,9 @@ int main () {
 	//render loop
 	while(quit == 0) {
 		
+
+
+
 		//check for new events every frame
 		SDL_PumpEvents();
 
@@ -192,13 +225,21 @@ int main () {
             				
 			SDL_Delay(sleep);
 		}
+	SDL_RenderClear(renderer);
+	// copy the texture to the rendering context
+	SDL_RenderCopy(renderer, img, NULL, &texr);
+	// flip the backbuffer
+	// this means that everything that we prepared behind the screens is actually shown
+    SDL_RenderPresent (renderer);
+	//free the screen buffer
 	}
 
-	//free the screen buffer
 	free(pixels);
 	
 	//Destroy window 
-	SDL_DestroyWindow(window);
+	SDL_DestroyTexture(img);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(win);
 
 	//Quit SDL subsystems 
 	SDL_Quit(); 
@@ -208,25 +249,28 @@ int main () {
 
 int init() {
 
-	//Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-
-		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-		
-		return 1;
-	} 
+	 
 	
 	//Create window	
-	SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN, &window, &renderer);
+	//SDL_CreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN, &window, &renderer);
 	
+	//SDL_Texture *screen = IMG_LoadTexture(renderer, "./resources/1.png");
+	//renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_ACCELERATED);
 	//set up screen texture
-	screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+	//screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
 	
 	//allocate pixel buffer
-	pixels = (Uint32*) malloc((SCREEN_WIDTH * SCREEN_HEIGHT) * sizeof(Uint32));
+	//pixels = (Uint32*) malloc((SCREEN_WIDTH * SCREEN_HEIGHT) * sizeof(Uint32));
+//Create window	
+	//SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN, &window, &renderer);
+	
+	//set up screen texture
+	//screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+	
+	//allocate pixel buffer
+//	pixels = (Uint32*) malloc((SCREEN_WIDTH * SCREEN_HEIGHT) * sizeof(Uint32));
 
-
-	if (window == NULL) { 
+	/*if (window == NULL) { 
 		
 		printf ("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 		
@@ -245,7 +289,7 @@ int init() {
 		printf ("Error allocating pixel buffer");
 		
 		return 1;
-	}
+	}*/
 
 	return 0;
 }

@@ -2,6 +2,7 @@
 //renderer.c
 
 #include "renderer.h"
+#include <stdlib.h>
 
 int draw_line(uint32_t* pixel_buffer, int x1, int y1, int x2, int y2, uint32_t colour) {
 
@@ -26,7 +27,7 @@ int draw_line(uint32_t* pixel_buffer, int x1, int y1, int x2, int y2, uint32_t c
 	int dy = y2 - y1;
 
 	//the length of the line is greater along the X axis
-	if (dx >= fabs(dy)) {
+	if (dx >= abs(dy)) {
 		
 		float slope = (float) dy / dx;
 	
@@ -86,7 +87,7 @@ int draw_line(uint32_t* pixel_buffer, int x1, int y1, int x2, int y2, uint32_t c
 	}
 
 	//the length of the line is greater along the Y axis
-	if (fabs(dy) > dx) {
+	if (abs(dy) > dx) {
 		
 		float slope = (float) dx / dy;
 		
@@ -126,7 +127,7 @@ int draw_line(uint32_t* pixel_buffer, int x1, int y1, int x2, int y2, uint32_t c
 			int i = 0;
 			
 			//loop through all the y values
-			for(i = 1; i <= fabs(dy); i++) {
+			for(i = 1; i <= abs(dy); i++) {
 				
 				int y = y1 - i;
 				

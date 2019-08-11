@@ -96,14 +96,14 @@ void draw_player(uint32_t* pixel_buffer, struct player* p) {
 		}
 	}
 
-	/*
+	
 	//draw vert representing ships location
 	struct vector2d cpy = {p->location.x, p->location.y};
 	struct vector2d translation = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
 	add_vector(&cpy, &translation);
 
 	draw_pixel(pixel_buffer, cpy.x, cpy.y, 0x00ff00ff);	
-	*/
+	
 }
 
 void update_player(struct player* p) {

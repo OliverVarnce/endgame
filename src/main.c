@@ -71,8 +71,8 @@ int main () {
 		SDL_PumpEvents();
 
 		const Uint8 *state = SDL_GetKeyboardState(NULL);
-		
-		if (state[SDL_SCANCODE_ESCAPE]) {
+		//Манипуляция с клавиатурой
+		if (state[SDL_SCANCODE_Q]) {
 		
 			quit = 1;
 		}

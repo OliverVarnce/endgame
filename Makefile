@@ -7,7 +7,8 @@ INC = 	inc/*.h
 SDL =   -F inc/framework -I inc/framework/SDL2.framework/SDL2
 
 CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic \
-	 	 -rpath inc/framework -framework SDL2 
+	 	 -rpath inc/framework -framework SDL2 \
+		-I includes/frameworks/SDL2_image.framework/Headers  
 
 all: $(NAME)
 

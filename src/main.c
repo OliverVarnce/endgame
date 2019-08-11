@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include "SDL2_image/SDL_image.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "renderer.h"
@@ -8,7 +9,9 @@
 #define ASTEROIDS 27
 #define LIVES 3
 
-int init(int width, int height);
+
+
+int init(int width, int height );
 
 SDL_Window* window = NULL;			//The window we'll be rendering to
 SDL_Renderer *renderer;				//The renderer SDL will use to draw to the screen
@@ -54,6 +57,7 @@ int main () {
 	//set up player and asteroids in world space
 	init_player(&p);
 	init_asteroids(asteroids, ASTEROIDS);
+	//init_bcg(water, WATER);
 
 	int sleep = 0;
 	int quit = 0;

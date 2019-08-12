@@ -6,9 +6,9 @@ INC = 	inc/*.h
 
 SDL =   -F inc/framework -I inc/framework/SDL2.framework/SDL2
 
-CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic \
+CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic -fsanitize=address -g \
 	 	 -rpath inc/framework -framework SDL2 -framework SDL2_image\
-		-I includes/frameworks/SDL2_image.framework/Headers  
+		-I includes/frameworks/SDL2_image.framework/Headers   
 
 all: $(NAME)
 

@@ -7,6 +7,11 @@
 const int SCREEN_WIDTH = 1366;
 const int SCREEN_HEIGHT = 800;
 
+void respawn_trash(SDL_Rect *trash)
+{
+    trash->x = random() % 1366;
+    trash->y = random() % 800;
+}
  
 int main() {
     int running = 1;
@@ -42,16 +47,20 @@ int main() {
                 shp.x -= 10;
             if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RIGHT == event.key.keysym.scancode)
                 shp.x += 10;
-
         }
-
-        if(SDL_HasIntersection(&shp, &t) == SDL_TRUE)
-            running = 0;
 
         SDL_BlitSurface(img, NULL, surface, &rect); // вставляет картинку
         SDL_BlitSurface(ship, NULL, surface, &shp);
-        SDL_BlitSurface(trash, NULL, surface, &t); // вставляет картинку
+        if (trash != NULL) {
+            SDL_BlitSurface(trash, NULL, surface, &t); // вставляет картинку
+        }
         SDL_UpdateWindowSurface(window);
+
+        if(SDL_HasIntersection(&shp, &t) == SDL_TRUE)
+        {
+            respawn_trash(&t);
+            //SDL_FreeSurface(trash);
+        }
     }
     
     SDL_DestroyWindow(window);

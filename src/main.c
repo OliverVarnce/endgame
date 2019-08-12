@@ -9,7 +9,8 @@ const int SCREEN_WIDTH = 1366;
 const int SCREEN_HEIGHT = 800;
 
 // inline function to swap two numbers
-void swap(char *x, char *y) {
+void swap(char *x, char *y) 
+{
     char t = *x; *x = *y; *y = t;
 }
 

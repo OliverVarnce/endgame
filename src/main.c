@@ -84,24 +84,22 @@ int main() {
     SDL_Event event;
 
     int score = 0;
-
-    char buff[3];
-    char *score_string;
-
-    // int x;
-    // int y = 0;
     
     SDL_Init(SDL_INIT_EVERYTHING);
+
+    //scoreboard initialization
     TTF_Init();
+    char buff[3];
+    char *score_string;
+    TTF_Font* Sans = TTF_OpenFont("resources/OpenSans-Bold.ttf", 40);
+    SDL_Color text_color = {247, 220, 111, 0};
+    score_string = itoa(score, buff, 10);
+    SDL_Surface *text = TTF_RenderText_Solid(Sans, score_string, text_color);
+
     SDL_Window *window = SDL_CreateWindow("SAVE THE OCEAN", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Surface *surface = SDL_GetWindowSurface(window);  // создает sufrace для всего окна
     SDL_Surface *img = IMG_Load("resources/water_1.jpg");
 
-    TTF_Font* Sans = TTF_OpenFont("resources/OpenSans-Bold.ttf", 40);
-    SDL_Color text_color = {247, 220, 111, 0};
-
-    score_string = itoa(score, buff, 10);
-    SDL_Surface *text = TTF_RenderText_Solid(Sans, score_string, text_color);
     SDL_Surface *ship = IMG_Load("resources/ship.png"); // Эта функция загружвет изображение с любым расширением
     SDL_Surface *trash = IMG_Load("resources/trash.jpg");
     SDL_Rect rect = {0, 0, 0, 0}; // создаем прямоугольник с картинкой, которую будем вставлять. Первые две переменные x,y это начальные точки на экране  {x, y, h, w}

@@ -15,7 +15,7 @@ int main() {
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window = SDL_CreateWindow("SAVE THE OCEAN", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Surface *surface = SDL_GetWindowSurface(window);  // создает sufrace для всего окна
-    SDL_Surface *img = IMG_Load("resources/water1.gif");
+    SDL_Surface *img = IMG_Load("resources/water2.gif");
     SDL_Surface *ship = IMG_Load("resources/ship.png"); // Эта функция загружвет изображение с любым расширением
     SDL_Rect rect = {0, 0, 0, 0}; // создаем прямоугольник с картинкой, которую будем вставлять. Первые две переменные x,y это начальные точки на экране  {x, y, h, w}
 

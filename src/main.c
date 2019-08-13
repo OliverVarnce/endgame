@@ -7,8 +7,8 @@
 #include <stdio.h>
 
 
-const int SCREEN_WIDTH = 1366;
-const int SCREEN_HEIGHT = 800;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 
 void swap(char *x, char *y) 
 {
@@ -84,10 +84,11 @@ int main() {
     int running = 1;
     SDL_Event event;
     int score = 0;
-
+    float speed = 0.0;
     
     float x = 200, y = 200;
-    
+    int angle = 0;
+
     SDL_Init(SDL_INIT_EVERYTHING);
 
     TTF_Init();
@@ -98,24 +99,21 @@ int main() {
     score_string = itoa(score, buff, 10);
     SDL_Surface *text = TTF_RenderText_Solid(Sans, score_string, text_color);
 
-
-
-
-
     SDL_Window *window = SDL_CreateWindow("SAVE THE OCEAN", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Surface *surface = SDL_GetWindowSurface(window);  // создает sufrace для всего окна
     SDL_Surface *img = IMG_Load("./resources/water.jpg");
     SDL_Surface *ship = IMG_Load("./resources/ship.png"); // Эта функция загружвет изображение с любым расширением
     SDL_Surface *trash = IMG_Load("./resources/trash.jpg");
-
+    SDL_Surface *mine = IMG_Load("./resources/mine.png");
+    
    
     
     SDL_Rect rect = {0, 0, 0, 0}; // создаем прямоугольник с картинкой, которую будем вставлять. Первые две переменные x,y это начальные точки на экране  {x, y, h, w}
-    SDL_Rect shp = {0, 0, 0, 0};
     SDL_Rect t = {500, 500, 0, 0};
     SDL_Rect txt = {1200, 30, 0, 0};
+    SDL_Rect rec_mine = {100, 100, 0, 0};
 
-    int angle = 0;
+    
 
     if (NULL == window)
         exit (1);
@@ -126,17 +124,25 @@ int main() {
         {
             if((SDL_QUIT == event.type) || (SDL_KEYDOWN == event.type && SDL_SCANCODE_ESCAPE == event.key.keysym.scancode))
                 running = 0;
-            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode)
-                x += cos(angle*M_PI/180.0)*2.0;
-                y += sin(angle*M_PI/180.0)*2.0;
-            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode)
-                x -= cos(angle*M_PI/180.0)*2.0;
-                y -= sin(angle*M_PI/180.0)*2.0;
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) {
+                speed = speed + 0.2;
+            }
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode) {
+                speed = speed - 0.5;
+            }
             if (event.type == SDL_KEYDOWN && SDL_SCANCODE_LEFT == event.key.keysym.scancode)
-                angle +=10;
+                angle += 20;
             if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RIGHT == event.key.keysym.scancode)
-                angle -=10;
+                angle -= 20;
         }
+
+        if (speed < 0)
+            speed = 0;
+        if (speed > 3)
+            speed = 3;
+
+        x -= sin(angle*M_PI/180.0)*speed;
+        y -= cos(angle*M_PI/180.0)*speed;
 
         if (angle >= 360) 
             angle -=360;
@@ -148,13 +154,24 @@ int main() {
         rec.x -= rotatedimage->w/2 - ship->w/2;
         rec.y -= rotatedimage->h/2 - ship->h/2;
 
+        if (x < -50)
+            x = 1920;
+        if (x > 1920)
+            x = -50;
+        if (y < -50)
+            y = 1080;
+        if (y > 1080)
+            y = -50;
+
         SDL_BlitSurface(img, NULL, surface, &rect); // вставляет картинку
         SDL_BlitSurface(rotatedimage, NULL, surface, &rec);
         SDL_BlitSurface(trash, NULL, surface, &t); // вставляет картинку
         SDL_BlitSurface(text, NULL, surface, &txt);
+        SDL_BlitSurface(mine, NULL, surface, &rec_mine);
+
         SDL_UpdateWindowSurface(window);
 
-        if(SDL_HasIntersection(&shp, &t) == SDL_TRUE)
+        if(SDL_HasIntersection(&rec, &t) == SDL_TRUE)
         {
             respawn_trash(&t);
             score++;

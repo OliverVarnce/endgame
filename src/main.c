@@ -87,6 +87,7 @@ int main() {
     float ship_speed = 0.0;
     
     int random_seed;
+    int kostil = 0;
 
     float ship_x = 200, ship_y = 200;
     float mine1_x = 200, mine1_y = 200;
@@ -116,8 +117,7 @@ int main() {
     SDL_Surface *mine1 = IMG_Load("./resources/mine.png");
     SDL_Surface *torpeda1 = IMG_Load("./resources/torpeda.png");
 
-    
-    //g начальное положение текстур на карте
+    //начальное положение текстур на карте
     SDL_Rect rect = {0, 0, 0, 0}; // создаем прямоугольник с картинкой, которую будем вставлять. Первые две переменные x,y это начальные точки на экране  {x, y, h, w}
     SDL_Rect t = {500, 500, 0, 0};
     SDL_Rect txt = {1200, 30, 0, 0};
@@ -192,8 +192,34 @@ int main() {
         // torpeda1
         SDL_Surface * rotated_torpeda1 = rotozoomSurface(torpeda1, torpeda1_angle, 1.0,0);
         SDL_Rect torpeda1_rec ={(int)torpeda1_x,(int)torpeda1_y,0,0};
-        torpeda1_rec.x -= rotatedimage->w/2 - ship->w/2;
-        torpeda1_rec.y -= rotatedimage->h/2 - ship->h/2;
+        torpeda1_rec.x -= rotated_torpeda1->w/2 - torpeda1->w/2;
+        torpeda1_rec.y -= rotated_torpeda1->h/2 - torpeda1->h/2;
+        if (score % 3 == 0 && kostil == 0 && score != 0) {
+            random_seed = random() % 4;
+            kostil = 1;
+            if (random_seed == 0) {
+                torpeda1_x = random() % 1920;
+                torpeda1_y = 1080;
+                torpeda1_angle = 0;
+            }
+            else if (random_seed == 1) {
+                torpeda1_x = random() % 1920;
+                torpeda1_y = 0;
+                torpeda1_angle = 180;
+            }
+            else if (random_seed == 2) {
+                torpeda1_x = 0;
+                torpeda1_y = random() % 1080;
+                torpeda1_angle = 270;
+            }
+            else if (random_seed == 3) {
+                torpeda1_x = 1920;
+                torpeda1_y = random() % 1080;
+                torpeda1_angle = 90;
+            }
+        }
+        else if (score % 3 != 0)
+            kostil = 0;
 
         // возврат корабля обратно на карту (если он выходит за карту)
         if (ship_x < -50)

@@ -101,6 +101,10 @@ void move_mine(float *x, float *y, int *angle) {
 }
  
 int main() {
+    int start = 1;
+    int menu_up_down = 0;
+    int pause = 1;
+    int pause_up_down = 0;
     int running = 1;
     SDL_Event event;
     int score = 0;
@@ -163,6 +167,12 @@ int main() {
     SDL_Surface *lives2 = IMG_Load("./resources/lives.png");
     SDL_Surface *lives3 = IMG_Load("./resources/lives.png");
 
+    SDL_Surface *pause_m1 = IMG_Load("./resources/pause1.jpg");
+    SDL_Surface *pause_m2 = IMG_Load("./resources/pause2.jpg");
+
+    SDL_Surface *start_m1 = IMG_Load("./resources/stat_quit1.jpg");
+    SDL_Surface *start_m2 = IMG_Load("./resources/stat_quit2.jpg");
+
     //начальное положение текстур на карте
     SDL_Rect rect = {0, 0, 0, 0}; // создаем прямоугольник с картинкой, которую будем вставлять. Первые две переменные x,y это начальные точки на экране  {x, y, h, w}
     SDL_Rect t = {500, 500, 0, 0};
@@ -176,8 +186,49 @@ int main() {
     SDL_Rect lives2_rect = {50, 20, 0, 0};
     SDL_Rect lives3_rect = {80, 20, 0, 0};
 
+    SDL_Rect pause1_rect = {0, 0, 0, 0};
+    SDL_Rect pause2_rect = {0, 0, 0, 0};
+
+    SDL_Rect start1_rect = {0, 0, 0, 0};
+    SDL_Rect start2_rect = {0, 0, 0, 0};
+
     if (NULL == window)
         exit (1);
+
+    while(start)
+    {
+        while(SDL_PollEvent(&event))
+        {
+
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
+                menu_up_down % 2 == 0)
+            {
+                start = 0;
+            }
+            else if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
+                menu_up_down % 2 != 0)
+            {
+                start = 0;
+                running = 0;
+            }
+            if ((event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) || 
+                (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode))
+            {
+                menu_up_down++;
+            }
+            if(menu_up_down % 2 == 0)
+            {
+                SDL_BlitSurface(start_m1, NULL, surface, &start1_rect);
+            }
+            else
+            {
+                SDL_BlitSurface(start_m2, NULL, surface, &start2_rect);
+            }
+            SDL_UpdateWindowSurface(window);
+        }
+
+    }
+    start = 1;
     
     while (running)
     {
@@ -196,6 +247,42 @@ int main() {
                 ship_angle += 20;
             if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RIGHT == event.key.keysym.scancode)
                 ship_angle -= 20;
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_P == event.key.keysym.scancode)
+            {
+                pause = 1;
+
+                while(pause == 1)
+                {
+                    while(SDL_PollEvent(&event))
+                    {
+                        if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
+                            pause_up_down % 2 == 0)
+                        {
+                            pause = 0;
+                        }
+                        else if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
+                            pause_up_down % 2 != 0)
+                        {
+                            pause = 0;
+                            running = 0;
+                        }
+                        if ((event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) || 
+                            (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode))
+                        {
+                            pause_up_down++;
+                        }
+                        if(pause_up_down % 2 == 0)
+                        {
+                            SDL_BlitSurface(pause_m1, NULL, surface, &pause1_rect);
+                        }
+                        else
+                        {
+                            SDL_BlitSurface(pause_m2, NULL, surface, &pause2_rect);
+                        }
+                        SDL_UpdateWindowSurface(window);
+                    }
+                }
+            }
         }
 
         // ограничение скорости корабля
@@ -264,6 +351,7 @@ int main() {
         SDL_Rect torpeda1_rec ={(int)torpeda1_x,(int)torpeda1_y,0,0};
         torpeda1_rec.x -= rotated_torpeda1->w/2 - torpeda1->w/2;
         torpeda1_rec.y -= rotated_torpeda1->h/2 - torpeda1->h/2;
+
         if (score % 3 == 0 && kostil == 0 && score != 0) {
             random_seed = random() % 4;
             kostil = 1;
@@ -342,7 +430,7 @@ int main() {
         // update screen
         SDL_UpdateWindowSurface(window);
 
-        // score && trash cath
+        // score && trash catch
         // trash 1
         if(SDL_HasIntersection(&rec, &t) == SDL_TRUE)
         {
@@ -374,13 +462,57 @@ int main() {
             if (lives == 1)
                 lives2_rect.x = 2000;
             if (lives == 0)
-                lives1_rect.x = 2000;
+            {
+
+                running = 0;
+                
+            }
             ship_x = 900;
             ship_y = 400;
             ship_speed = 0;
         }
+
+        TTF_CloseFont(Sans);
+        Sans = NULL;
+        // SDL_FreeSurface(torpeda1);
+        // torpeda1 = NULL;
+
     }
     
+    while(start)
+    {
+        while(SDL_PollEvent(&event))
+        {
+
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
+                menu_up_down % 2 == 0)
+            {
+                start = 0;
+            }
+            else if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
+                menu_up_down % 2 != 0)
+            {
+                start = 0;
+                running = 0;
+            }
+            if ((event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) || 
+                (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode))
+            {
+                menu_up_down++;
+            }
+            if(menu_up_down % 2 == 0)
+            {
+                SDL_BlitSurface(start_m1, NULL, surface, &start1_rect);
+            }
+            else
+            {
+                SDL_BlitSurface(start_m2, NULL, surface, &start2_rect);
+            }
+            SDL_UpdateWindowSurface(window);
+        }
+
+    }
+
     // free memory
     SDL_DestroyWindow(window);
     TTF_Quit();

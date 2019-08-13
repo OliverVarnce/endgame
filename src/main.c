@@ -79,6 +79,26 @@ void respawn_trash(SDL_Rect *trash)
     trash->x = random() % 1920;
     trash->y = random() % 1080;
 }
+
+void move_mine(float *x, float *y, int *angle) {
+    *x -= sin(*angle*M_PI/180.0)*0.1;
+    *y -= cos(*angle*M_PI/180.0)*0.1;
+    if (*x < -50)
+        *x = 1920;
+    if (*x > 1920)
+        *x = -50;
+    if (*y < -50)
+        *y = 1080;
+    if (*y > 1080)
+        *y = -50;
+    int random_seed = random() % 11;
+    if ((random() % 100) % 88 == 0) {
+        if (random_seed % 2 == 0)
+            *angle += random_seed;
+        else
+            *angle -= random_seed;
+    }    
+}
  
 int main() {
     int running = 1;
@@ -179,6 +199,8 @@ int main() {
         SDL_Rect mine1_rec ={(int)mine1_x,(int)mine1_y,0,0};
         mine1_rec.x -= rotated_mine1->w/2 - mine1->w/2;
         mine1_rec.y -= rotated_mine1->h/2 - mine1->h/2;
+        move_mine(&mine1_x, &mine1_y, &mine1_angle);
+        /*
         mine1_x -= sin(mine1_angle*M_PI/180.0)*0.1;
         mine1_y -= cos(mine1_angle*M_PI/180.0)*0.1;
         if (mine1_x < -50)
@@ -196,6 +218,7 @@ int main() {
             else
                 mine1_angle -= random_seed;
         }
+        */
         
         // torpeda1
         SDL_Surface * rotated_torpeda1 = rotozoomSurface(torpeda1, torpeda1_angle, 1.0,0);

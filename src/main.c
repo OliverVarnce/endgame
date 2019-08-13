@@ -111,10 +111,18 @@ int main() {
     int kostil = 0;
 
     float ship_x = 200, ship_y = 200;
-    float mine1_x = 200, mine1_y = 1000;
+    float mine1_x = 100, mine1_y = 1900;
+    float mine2_x = 500, mine2_y = 1500;
+    float mine3_x = 1000, mine3_y = 1000;
+    float mine4_x = 1500, mine4_y = 500;
+    float mine5_x = 1900, mine5_y = 100;
     float torpeda1_x = 2000, torpeda1_y = 100;
     int ship_angle = 0;
     int mine1_angle = 0;
+    int mine2_angle = 0;
+    int mine3_angle = 0;    
+    int mine4_angle = 0;
+    int mine5_angle = 0;
     int torpeda1_angle = 0;
 
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -134,8 +142,17 @@ int main() {
     // текстуры
     SDL_Surface *img = IMG_Load("./resources/water.jpg");
     SDL_Surface *ship = IMG_Load("./resources/ship.png"); // Эта функция загружвет изображение с любым расширением
-    SDL_Surface *trash = IMG_Load("./resources/trash.jpg");
+
     SDL_Surface *mine1 = IMG_Load("./resources/mine.png");
+    SDL_Surface *mine2 = IMG_Load("./resources/mine.png");
+    SDL_Surface *mine3 = IMG_Load("./resources/mine.png");
+    SDL_Surface *mine4 = IMG_Load("./resources/mine.png");
+    SDL_Surface *mine5 = IMG_Load("./resources/mine.png");
+
+    SDL_Surface *trash = IMG_Load("./resources/trash.png");
+    SDL_Surface *trash1 = IMG_Load("./resources/trash1.png");
+    SDL_Surface *trash2 = IMG_Load("./resources/_trash2.png");
+
     SDL_Surface *torpeda1 = IMG_Load("./resources/torpeda.png");
     SDL_Surface *lives1 = IMG_Load("./resources/lives.png");
     SDL_Surface *lives2 = IMG_Load("./resources/lives.png");
@@ -144,6 +161,10 @@ int main() {
     //начальное положение текстур на карте
     SDL_Rect rect = {0, 0, 0, 0}; // создаем прямоугольник с картинкой, которую будем вставлять. Первые две переменные x,y это начальные точки на экране  {x, y, h, w}
     SDL_Rect t = {500, 500, 0, 0};
+
+    SDL_Rect trash1_rec = {1000, 1000, 0, 0};
+    SDL_Rect trash2_rec = {600, 600, 0, 0};
+
     SDL_Rect txt = {1800, 20, 0, 0};
     SDL_Rect txt2 = {1650, 20, 0, 0};
     SDL_Rect lives1_rect = {20, 20, 0, 0};
@@ -200,25 +221,34 @@ int main() {
         mine1_rec.x -= rotated_mine1->w/2 - mine1->w/2;
         mine1_rec.y -= rotated_mine1->h/2 - mine1->h/2;
         move_mine(&mine1_x, &mine1_y, &mine1_angle);
-        /*
-        mine1_x -= sin(mine1_angle*M_PI/180.0)*0.1;
-        mine1_y -= cos(mine1_angle*M_PI/180.0)*0.1;
-        if (mine1_x < -50)
-            mine1_x = 1920;
-        if (mine1_x > 1920)
-            mine1_x = -50;
-        if (mine1_y < -50)
-            mine1_y = 1080;
-        if (mine1_y > 1080)
-            mine1_y = -50;
-        random_seed = random() % 11;
-        if ((random() % 100) % 88 == 0) {
-            if (random_seed % 2 == 0)
-                mine1_angle += random_seed;
-            else
-                mine1_angle -= random_seed;
-        }
-        */
+
+        // mine2
+        SDL_Surface * rotated_mine2 = rotozoomSurface(mine2, mine2_angle, 1.0,0);
+        SDL_Rect mine2_rec ={(int)mine2_x,(int)mine2_y,0,0};
+        mine2_rec.x -= rotated_mine2->w/2 - mine2->w/2;
+        mine2_rec.y -= rotated_mine2->h/2 - mine2->h/2;
+        move_mine(&mine2_x, &mine2_y, &mine2_angle);
+
+        // mine3
+        SDL_Surface * rotated_mine3 = rotozoomSurface(mine3, mine3_angle, 1.0,0);
+        SDL_Rect mine3_rec ={(int)mine3_x,(int)mine3_y,0,0};
+        mine3_rec.x -= rotated_mine3->w/2 - mine3->w/2;
+        mine3_rec.y -= rotated_mine3->h/2 - mine3->h/2;
+        move_mine(&mine3_x, &mine3_y, &mine3_angle);
+
+        // mine4
+        SDL_Surface * rotated_mine4 = rotozoomSurface(mine4, mine4_angle, 1.0,0);
+        SDL_Rect mine4_rec ={(int)mine4_x,(int)mine4_y,0,0};
+        mine4_rec.x -= rotated_mine4->w/2 - mine4->w/2;
+        mine4_rec.y -= rotated_mine4->h/2 - mine4->h/2;
+        move_mine(&mine4_x, &mine4_y, &mine4_angle);
+
+        // mine5
+        SDL_Surface * rotated_mine5 = rotozoomSurface(mine5, mine5_angle, 1.0,0);
+        SDL_Rect mine5_rec ={(int)mine5_x,(int)mine5_y,0,0};
+        mine5_rec.x -= rotated_mine5->w/2 - mine5->w/2;
+        mine5_rec.y -= rotated_mine5->h/2 - mine5->h/2;
+        move_mine(&mine5_x, &mine5_y, &mine5_angle);
         
         // torpeda1
         SDL_Surface * rotated_torpeda1 = rotozoomSurface(torpeda1, torpeda1_angle, 1.0,0);
@@ -265,11 +295,20 @@ int main() {
 
         SDL_BlitSurface(img, NULL, surface, &rect); // вставляет картинку
         SDL_BlitSurface(rotatedimage, NULL, surface, &rec);
-        SDL_BlitSurface(trash, NULL, surface, &t); 
+        
+        SDL_BlitSurface(trash, NULL, surface, &t);
+        SDL_BlitSurface(trash1, NULL, surface, &trash1_rec);
+        SDL_BlitSurface(trash2, NULL, surface, &trash2_rec);
+
         SDL_BlitSurface(text, NULL, surface, &txt);
         SDL_BlitSurface(text2, NULL, surface, &txt2);
-        SDL_BlitSurface(rotated_mine1, NULL, surface, &mine1_rec);
         SDL_BlitSurface(rotated_torpeda1, NULL, surface, &torpeda1_rec);
+
+        SDL_BlitSurface(rotated_mine1, NULL, surface, &mine1_rec);
+        SDL_BlitSurface(rotated_mine2, NULL, surface, &mine2_rec);
+        SDL_BlitSurface(rotated_mine3, NULL, surface, &mine3_rec);
+        SDL_BlitSurface(rotated_mine4, NULL, surface, &mine4_rec);
+        SDL_BlitSurface(rotated_mine5, NULL, surface, &mine5_rec);
 
         SDL_BlitSurface(lives1, NULL, surface, &lives1_rect);
         SDL_BlitSurface(lives2, NULL, surface, &lives2_rect);
@@ -278,14 +317,32 @@ int main() {
         // update screen
         SDL_UpdateWindowSurface(window);
 
-        // score
+        // score && trash cath
+        // trash 1
         if(SDL_HasIntersection(&rec, &t) == SDL_TRUE)
         {
             respawn_trash(&t);
             score++;
             text = refresh_score(text, score);
         }
-        if(SDL_HasIntersection(&rec, &torpeda1_rec) == SDL_TRUE || SDL_HasIntersection(&rec, &mine1_rec) == SDL_TRUE) {
+        //trash 2
+        if(SDL_HasIntersection(&rec, &trash1_rec) == SDL_TRUE)
+        {
+            respawn_trash(&trash1_rec);
+            score++;
+            text = refresh_score(text, score);
+        }
+        // trash 3
+        if(SDL_HasIntersection(&rec, &trash2_rec) == SDL_TRUE)
+        {
+            respawn_trash(&trash2_rec);
+            score++;
+            text = refresh_score(text, score);
+        }
+
+        if(SDL_HasIntersection(&rec, &torpeda1_rec) == SDL_TRUE || SDL_HasIntersection(&rec, &mine1_rec) == SDL_TRUE || 
+            SDL_HasIntersection(&rec, &mine2_rec) == SDL_TRUE || SDL_HasIntersection(&rec, &mine3_rec) == SDL_TRUE || 
+            SDL_HasIntersection(&rec, &mine4_rec) == SDL_TRUE || SDL_HasIntersection(&rec, &mine5_rec) == SDL_TRUE) {
             lives--;
             if (lives == 2)
                 lives3_rect.x = 2000;
@@ -295,6 +352,7 @@ int main() {
                 lives1_rect.x = 2000;
             ship_x = 900;
             ship_y = 600;
+            ship_speed = 0;
         }
     }
     

@@ -84,14 +84,15 @@ int main() {
     int running = 1;
     SDL_Event event;
     int score = 0;
+    int lives = 3;
     float ship_speed = 0.0;
     
     int random_seed;
     int kostil = 0;
 
     float ship_x = 200, ship_y = 200;
-    float mine1_x = 200, mine1_y = 200;
-    float torpeda1_x = 100, torpeda1_y = 100;
+    float mine1_x = 200, mine1_y = 1000;
+    float torpeda1_x = 2000, torpeda1_y = 100;
     int ship_angle = 0;
     int mine1_angle = 0;
     int torpeda1_angle = 0;
@@ -103,9 +104,9 @@ int main() {
     char *score_string;
     TTF_Font* Sans = TTF_OpenFont("./resources/OpenSans-Bold.ttf", 40);
     SDL_Color text_color = {247, 220, 111, 0};
-
     score_string = itoa(score, buff, 10);
     SDL_Surface *text = TTF_RenderText_Solid(Sans, score_string, text_color);
+    SDL_Surface *text2 = TTF_RenderText_Solid(Sans, "Score:", text_color);
 
     SDL_Window *window = SDL_CreateWindow("SAVE THE OCEAN", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Surface *surface = SDL_GetWindowSurface(window);  // создает sufrace для всего окна
@@ -116,11 +117,18 @@ int main() {
     SDL_Surface *trash = IMG_Load("./resources/trash.jpg");
     SDL_Surface *mine1 = IMG_Load("./resources/mine.png");
     SDL_Surface *torpeda1 = IMG_Load("./resources/torpeda.png");
+    SDL_Surface *lives1 = IMG_Load("./resources/lives.png");
+    SDL_Surface *lives2 = IMG_Load("./resources/lives.png");
+    SDL_Surface *lives3 = IMG_Load("./resources/lives.png");
 
     //начальное положение текстур на карте
     SDL_Rect rect = {0, 0, 0, 0}; // создаем прямоугольник с картинкой, которую будем вставлять. Первые две переменные x,y это начальные точки на экране  {x, y, h, w}
     SDL_Rect t = {500, 500, 0, 0};
-    SDL_Rect txt = {1200, 30, 0, 0};
+    SDL_Rect txt = {1800, 20, 0, 0};
+    SDL_Rect txt2 = {1650, 20, 0, 0};
+    SDL_Rect lives1_rect = {20, 20, 0, 0};
+    SDL_Rect lives2_rect = {50, 20, 0, 0};
+    SDL_Rect lives3_rect = {80, 20, 0, 0};
 
     if (NULL == window)
         exit (1);
@@ -220,7 +228,8 @@ int main() {
         }
         else if (score % 3 != 0)
             kostil = 0;
-
+        torpeda1_x -= sin(torpeda1_angle*M_PI/180.0)*3;
+        torpeda1_y -= cos(torpeda1_angle*M_PI/180.0)*3;
         // возврат корабля обратно на карту (если он выходит за карту)
         if (ship_x < -50)
             ship_x = 1920;
@@ -235,8 +244,13 @@ int main() {
         SDL_BlitSurface(rotatedimage, NULL, surface, &rec);
         SDL_BlitSurface(trash, NULL, surface, &t); 
         SDL_BlitSurface(text, NULL, surface, &txt);
+        SDL_BlitSurface(text2, NULL, surface, &txt2);
         SDL_BlitSurface(rotated_mine1, NULL, surface, &mine1_rec);
         SDL_BlitSurface(rotated_torpeda1, NULL, surface, &torpeda1_rec);
+
+        SDL_BlitSurface(lives1, NULL, surface, &lives1_rect);
+        SDL_BlitSurface(lives2, NULL, surface, &lives2_rect);
+        SDL_BlitSurface(lives3, NULL, surface, &lives3_rect);
 
         // update screen
         SDL_UpdateWindowSurface(window);
@@ -247,6 +261,17 @@ int main() {
             respawn_trash(&t);
             score++;
             text = refresh_score(text, score);
+        }
+        if(SDL_HasIntersection(&rec, &torpeda1_rec) == SDL_TRUE || SDL_HasIntersection(&rec, &mine1_rec) == SDL_TRUE) {
+            lives--;
+            if (lives == 2)
+                lives3_rect.x = 2000;
+            if (lives == 1)
+                lives2_rect.x = 2000;
+            if (lives == 0)
+                lives1_rect.x = 2000;
+            ship_x = 900;
+            ship_y = 600;
         }
     }
     

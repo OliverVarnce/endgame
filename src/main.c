@@ -117,6 +117,7 @@ int main() {
     float mine4_x = 1500, mine4_y = 500;
     float mine5_x = 1900, mine5_y = 100;
     float torpeda1_x = 2000, torpeda1_y = 100;
+    int count_w = 1;
     int ship_angle = 0;
     int mine1_angle = 0;
     int mine2_angle = 0;
@@ -140,7 +141,11 @@ int main() {
     SDL_Surface *surface = SDL_GetWindowSurface(window);  // создает sufrace для всего окна
 
     // текстуры
-    SDL_Surface *img = IMG_Load("./resources/water.jpg");
+    SDL_Surface *img1 = IMG_Load("./resources/water/1.jpg");
+    SDL_Surface *img2 = IMG_Load("./resources/water/2.jpg");
+    SDL_Surface *img3 = IMG_Load("./resources/water/3.jpg");
+    SDL_Surface *img4 = IMG_Load("./resources/water/4.jpg");
+
     SDL_Surface *ship = IMG_Load("./resources/ship.png"); // Эта функция загружвет изображение с любым расширением
 
     SDL_Surface *mine1 = IMG_Load("./resources/mine.png");
@@ -208,6 +213,10 @@ int main() {
             ship_angle -=360;
         if (ship_angle <= -360)
             ship_angle +=360;
+
+        //счетчик дл анимации воды
+        if(count_w > 120)
+            count_w = 1;
         
         //Магия для корабля, не трогать
         SDL_Surface * rotatedimage = rotozoomSurface(ship, ship_angle, 1.0,0);
@@ -293,7 +302,23 @@ int main() {
         if (ship_y > 1080)
             ship_y = -50;
 
-        SDL_BlitSurface(img, NULL, surface, &rect); // вставляет картинку
+
+        if (count_w > 1 && count_w < 20)
+            SDL_BlitSurface(img1, NULL, surface, &rect); // вставляет картинку
+        if (count_w > 20 && count_w < 40)
+            SDL_BlitSurface(img2, NULL, surface, &rect); // вставляет картинку
+        if (count_w > 40 && count_w < 60)
+            SDL_BlitSurface(img3, NULL, surface, &rect); // вставляет картинку
+        if (count_w > 60 && count_w < 80)
+            SDL_BlitSurface(img4, NULL, surface, &rect); // вставляет картинку
+        if (count_w > 80 && count_w < 100)
+            SDL_BlitSurface(img3, NULL, surface, &rect); // вставляет картинку
+        if (count_w > 100  && count_w < 120)
+            SDL_BlitSurface(img2, NULL, surface, &rect); // вставляет картинку
+        
+
+        count_w++;
+
         SDL_BlitSurface(rotatedimage, NULL, surface, &rec);
         
         SDL_BlitSurface(trash, NULL, surface, &t);
@@ -351,7 +376,7 @@ int main() {
             if (lives == 0)
                 lives1_rect.x = 2000;
             ship_x = 900;
-            ship_y = 600;
+            ship_y = 400;
             ship_speed = 0;
         }
     }

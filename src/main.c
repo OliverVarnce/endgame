@@ -2,21 +2,6 @@
 
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
-
-SDL_Surface *refresh_score(SDL_Surface *text, int score) {
-    SDL_FreeSurface(text);
-    char buff[3];
-    char *score_string;
-    TTF_Font* Sans = TTF_OpenFont("resources/OpenSans-Bold.ttf", 40);
-    SDL_Color text_color = {247, 220, 111, 0};
-    score_string = itoa(score, buff, 10);
-    SDL_Surface *retext = TTF_RenderText_Solid(Sans, score_string, text_color);
-    return retext;
-}
-
-
-
-
  
 int main() {
     int start = 1;
@@ -362,13 +347,27 @@ int main() {
         // update screen
         SDL_UpdateWindowSurface(window);
 
+        // free surface
+        SDL_FreeSurface(rotated_mine1);
+        SDL_FreeSurface(rotated_mine2);
+        SDL_FreeSurface(rotated_mine3);
+        SDL_FreeSurface(rotated_mine4);
+        SDL_FreeSurface(rotated_mine5);
+
+        SDL_FreeSurface(rotated_ripple);
+        SDL_FreeSurface(rotatedimage);
+        SDL_FreeSurface(rotated_torpeda1);
+
         // score && trash catch
         // trash 1
+
         if(SDL_HasIntersection(&rec, &t) == SDL_TRUE)
         {
             respawn_trash(&t);
             score++;
-            text = refresh_score(text, score);
+            SDL_FreeSurface(text);
+            score_string = itoa(score, buff, 10);
+            text = TTF_RenderText_Solid(Sans, score_string, text_color);
             Mix_PlayChannel(-1, trashM, 0);
         }
         //trash 2
@@ -376,7 +375,9 @@ int main() {
         {
             respawn_trash(&trash1_rec);
             score++;
-            text = refresh_score(text, score);
+            SDL_FreeSurface(text);
+            score_string = itoa(score, buff, 10);
+            text = TTF_RenderText_Solid(Sans, score_string, text_color);
             Mix_PlayChannel(-1, trashM, 0);
         }
         // trash 3
@@ -384,7 +385,9 @@ int main() {
         {
             respawn_trash(&trash2_rec);
             score++;
-            text = refresh_score(text, score);
+            SDL_FreeSurface(text);
+            score_string = itoa(score, buff, 10);
+            text = TTF_RenderText_Solid(Sans, score_string, text_color);
             Mix_PlayChannel(-1, trashM, 0);
         }
 
@@ -409,13 +412,6 @@ int main() {
             ship_y = 400;
             ship_speed = 0;
         }
-
-        TTF_CloseFont(Sans);
-        Sans = NULL;
-
-         //SDL_FreeSurface(torpeda1);
-        // torpeda1 = NULL;
-    
     }
     
     while(start)
@@ -432,7 +428,9 @@ int main() {
         SDL_UpdateWindowSurface(window);
     }
 
-    // free memory
+
+    SDL_FreeSurface(torpeda1);
+    
     Mix_FreeMusic(backgroundSound);
     Mix_FreeChunk(trashM);
     Mix_FreeChunk(boom);

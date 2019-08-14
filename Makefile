@@ -7,7 +7,7 @@ INC = 	inc/*.h
 
 SDL =   -F inc/framework -I inc/framework/SDL2.framework/SDL2
 
-CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic -fsanitize=address -g \
+CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic\
 		 -framework SDL2_ttf \
 	 	 -rpath inc/framework -framework SDL2 \
 	 	 					  -framework SDL2_image \

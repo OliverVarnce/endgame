@@ -1,11 +1,4 @@
-#include <SDL2/SDL.h>
-#include "SDL2_image/SDL_image.h"
-#include "SDL2_mixer/SDL_mixer.h"
-#include "SDL2_rotozoom.h"
-#include "SDL2_ttf/SDL_ttf.h"
 #include "header.h"
-#include <stdlib.h>
-#include <stdio.h>
 
 
 const int SCREEN_WIDTH = 1920;
@@ -75,11 +68,7 @@ SDL_Surface *refresh_score(SDL_Surface *text, int score) {
     return retext;
 }
 
-void respawn_trash(SDL_Rect *trash)
-{
-    trash->x = random() % 1920;
-    trash->y = random() % 1080;
-}
+
 
 void move_mine(float *x, float *y, int *angle) {
     *x -= sin(*angle*M_PI/180.0)*0.1;
@@ -179,8 +168,7 @@ int main() {
     SDL_Surface *start_m1 = IMG_Load("./resources/Head_NG.jpg");
     SDL_Surface *start_m2 = IMG_Load("./resources/Head_QT.jpg");
 
-    SDL_Surface *go_m1 = IMG_Load("./resources/Game_Over_NG.jpg");
-    SDL_Surface *go_m2 = IMG_Load("./resources/Game_Over_QT.jpg");
+    SDL_Surface *go_m1 = IMG_Load("./resources/Game_Over.jpg");
 
     //начальное положение текстур на карте
     SDL_Rect rect = {0, 0, 0, 0}; // создаем прямоугольник с картинкой, которую будем вставлять. Первые две переменные x,y это начальные точки на экране  {x, y, h, w}
@@ -203,7 +191,6 @@ int main() {
     SDL_Rect start2_rect = {0, 0, 0, 0};
 
     SDL_Rect go1_rect = {0, 0, 0, 0};
-    SDL_Rect go2_rect = {0, 0, 0, 0};
 
 
     if (NULL == window)
@@ -265,8 +252,7 @@ int main() {
         // обработка нажатий клавиш
         while(SDL_PollEvent(&event))
         {
-            if((SDL_QUIT == event.type) || (SDL_KEYDOWN == event.type && SDL_SCANCODE_ESCAPE == event.key.keysym.scancode))
-                running = 0;
+            
             if (event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) {
                 ship_speed = ship_speed + 0.2; 
             }
@@ -277,7 +263,7 @@ int main() {
                 ship_angle += 20;
             if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RIGHT == event.key.keysym.scancode)
                 ship_angle -= 20;
-            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_P == event.key.keysym.scancode)
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_ESCAPE == event.key.keysym.scancode)
             {
                 pause = 1;
 
@@ -285,8 +271,8 @@ int main() {
                 {
                     while(SDL_PollEvent(&event))
                     {
-                        if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
-                            pause_up_down % 2 == 0)
+                        if ((event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
+                            pause_up_down % 2 == 0) || (event.type == SDL_KEYDOWN && SDL_SCANCODE_ESCAPE == event.key.keysym.scancode))
                         {
                             pause = 0;
                         }
@@ -294,6 +280,7 @@ int main() {
                             pause_up_down % 2 != 0)
                         {
                             pause = 0;
+                            start = 0;
                             running = 0;
                         }
                         if ((event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) || 
@@ -525,32 +512,13 @@ int main() {
         while(SDL_PollEvent(&event))
         {
 
-            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
-                menu_up_down % 2 == 0)
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode)
             {
                 start = 0;
-            }
-            else if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
-                menu_up_down % 2 != 0)
-            {
-                start = 0;
-                running = 0;
-            }
-            if ((event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) || 
-                (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode))
-            {
-                menu_up_down++;
             }
         }
-        if(menu_up_down % 2 == 0)
-            {
-                SDL_BlitSurface(go_m1, NULL, surface, &go1_rect);
-            }
-            else
-            {
-                SDL_BlitSurface(go_m2, NULL, surface, &go2_rect);
-            }
-            SDL_UpdateWindowSurface(window);
+        SDL_BlitSurface(go_m1, NULL, surface, &go1_rect);
+        SDL_UpdateWindowSurface(window);
     }
 
     // free memory

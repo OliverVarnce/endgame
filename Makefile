@@ -15,7 +15,6 @@ SRCS = 	src/SDL2_rotozoom.c \
 INC = 	inc/header.h \
 		inc/SDL2_rotozoom.h
 
-
 SDL =   -F inc/framework -I inc/framework/SDL2.framework/SDL2
 
 CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic\
@@ -35,7 +34,6 @@ install:
 	@cp $(SRCS) .
 	@cp $(INC) .
 	@clang $(CFLAGS) -o $(NAME) $(SRCS) $(LIBS) $(SDL) -I inc
-
 
 uninstall: clean
 	@rm -rf $(NAME)

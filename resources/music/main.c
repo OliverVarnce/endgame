@@ -1,7 +1,68 @@
+#include <SDL2/SDL.h>
+#include "SDL2_image/SDL_image.h"
+#include "SDL2_mixer/SDL_mixer.h"
+#include "SDL2_rotozoom.h"
+#include "SDL2_ttf/SDL_ttf.h"
 #include "header.h"
+#include <stdlib.h>
+#include <stdio.h>
+
 
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
+
+void swap(char *x, char *y) 
+{
+    char t = *x; *x = *y; *y = t;
+}
+
+// function to reverse buffer[i..j]
+char* reverse(char *buffer, int i, int j)
+{
+    while (i < j)
+        swap(&buffer[i++], &buffer[j--]);
+
+    return buffer;
+}
+
+// Iterative function to implement itoa() function in C
+char* itoa(int value, char* buffer, int base)
+{
+    // invalid input
+    if (base < 2 || base > 32)
+        return buffer;
+
+    // consider absolute value of number
+    int n = abs(value);
+
+    int i = 0;
+    while (n)
+    {
+        int r = n % base;
+
+        if (r >= 10) 
+            buffer[i++] = 65 + (r - 10);
+        else
+            buffer[i++] = 48 + r;
+
+        n = n / base;
+    }
+
+    // if number is 0
+    if (i == 0)
+        buffer[i++] = '0';
+
+    // If base is 10 and value is negative, the resulting string 
+    // is preceded with a minus sign (-)
+    // With any other base, value is always considered unsigned
+    if (value < 0 && base == 10)
+        buffer[i++] = '-';
+
+    buffer[i] = '\0'; // null terminate string
+
+    // reverse the string and return it
+    return reverse(buffer, 0, i - 1);
+}
 
 SDL_Surface *refresh_score(SDL_Surface *text, int score) {
     SDL_FreeSurface(text);
@@ -14,9 +75,31 @@ SDL_Surface *refresh_score(SDL_Surface *text, int score) {
     return retext;
 }
 
+void respawn_trash(SDL_Rect *trash)
+{
+    trash->x = random() % 1920;
+    trash->y = random() % 1080;
+}
 
-
-
+void move_mine(float *x, float *y, int *angle) {
+    *x -= sin(*angle*M_PI/180.0)*0.1;
+    *y -= cos(*angle*M_PI/180.0)*0.1;
+    if (*x < -50)
+        *x = 1920;
+    if (*x > 1920)
+        *x = -50;
+    if (*y < -50)
+        *y = 1080;
+    if (*y > 1080)
+        *y = -50;
+    int random_seed = random() % 11;
+    if ((random() % 100) % 88 == 0) {
+        if (random_seed % 2 == 0)
+            *angle += random_seed;
+        else
+            *angle -= random_seed;
+    }    
+}
  
 int main() {
     int start = 1;
@@ -24,16 +107,15 @@ int main() {
     int pause = 1;
     int pause_up_down = 0;
     int running = 1;
+    SDL_Event event;
     int score = 0;
     int lives = 3;
     float ship_speed = 0.0;
-
-    SDL_Event event;
     
     int random_seed;
     int kostil = 0;
 
-    float ship_x = 900, ship_y = 400;
+    float ship_x = 200, ship_y = 200;
     float mine1_x = 100, mine1_y = 1900;
     float mine2_x = 500, mine2_y = 1500;
     float mine3_x = 1000, mine3_y = 1000;
@@ -97,13 +179,14 @@ int main() {
     SDL_Surface *start_m1 = IMG_Load("./resources/Head_NG.jpg");
     SDL_Surface *start_m2 = IMG_Load("./resources/Head_QT.jpg");
 
-    SDL_Surface *go_m1 = IMG_Load("./resources/Game_Over.jpg");
+    SDL_Surface *go_m1 = IMG_Load("./resources/Game_Over_NG.jpg");
+    SDL_Surface *go_m2 = IMG_Load("./resources/Game_Over_QT.jpg");
 
     //начальное положение текстур на карте
     SDL_Rect rect = {0, 0, 0, 0}; // создаем прямоугольник с картинкой, которую будем вставлять. Первые две переменные x,y это начальные точки на экране  {x, y, h, w}
     SDL_Rect t = {500, 500, 0, 0};
 
-    SDL_Rect trash1_rec = {1500, 600, 0, 0};
+    SDL_Rect trash1_rec = {1000, 1000, 0, 0};
     SDL_Rect trash2_rec = {600, 600, 0, 0};
 
     SDL_Rect txt = {1800, 20, 0, 0};
@@ -120,13 +203,13 @@ int main() {
     SDL_Rect start2_rect = {0, 0, 0, 0};
 
     SDL_Rect go1_rect = {0, 0, 0, 0};
+    SDL_Rect go2_rect = {0, 0, 0, 0};
 
 
     if (NULL == window)
         exit (1);
 
     Mix_PlayMusic(backgroundSound, -1);
-
 
     while(start)
     {
@@ -161,9 +244,11 @@ int main() {
                 SDL_BlitSurface(start_m2, NULL, surface, &start2_rect);
             }
             SDL_UpdateWindowSurface(window);
+
         }
+
     }
-	Mix_CloseAudio();
+    Mix_CloseAudio();
  
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     Mix_Music *gameSound = Mix_LoadMUS("resources/music/game.mp3");
@@ -175,55 +260,78 @@ int main() {
         Mix_PlayMusic(gameSound, -1);
     }
 	
-    while (running) {
-        while(SDL_PollEvent(&event)) {   
-            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode)
+
+    while (running)
+    {
+        // обработка нажатий клавиш
+        while(SDL_PollEvent(&event))
+        {
+            if((SDL_QUIT == event.type) || (SDL_KEYDOWN == event.type && SDL_SCANCODE_ESCAPE == event.key.keysym.scancode))
+                running = 0;
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) {
                 ship_speed = ship_speed + 0.2; 
-            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode) 
+            }
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode) {
                 ship_speed = ship_speed - 0.5;
+            }
             if (event.type == SDL_KEYDOWN && SDL_SCANCODE_LEFT == event.key.keysym.scancode)
                 ship_angle += 20;
             if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RIGHT == event.key.keysym.scancode)
                 ship_angle -= 20;
-            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_ESCAPE == event.key.keysym.scancode) {
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_P == event.key.keysym.scancode)
+            {
                 pause = 1;
-                while(pause == 1) {
-                    while(SDL_PollEvent(&event)) {
-                        if ((event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
-                            pause_up_down % 2 == 0) || (event.type == SDL_KEYDOWN && 
-                            SDL_SCANCODE_ESCAPE == event.key.keysym.scancode))
+
+                while(pause == 1)
+                {
+                    while(SDL_PollEvent(&event))
+                    {
+                        if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
+                            pause_up_down % 2 == 0)
+                        {
                             pause = 0;
+                        }
                         else if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
-                            pause_up_down % 2 != 0) {
+                            pause_up_down % 2 != 0)
+                        {
                             pause = 0;
-                            start = 0;
                             running = 0;
                         }
                         if ((event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) || 
-                            (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode)) 
+                            (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode))
+                        {
                             pause_up_down++;
+                        }
                         if(pause_up_down % 2 == 0)
+                        {
                             SDL_BlitSurface(pause_m1, NULL, surface, &pause1_rect);
+                        }
                         else
+                        {
                             SDL_BlitSurface(pause_m2, NULL, surface, &pause2_rect);
+                        }
                         SDL_UpdateWindowSurface(window);
                     }
                 }
             }
         }
+        // ограничение скорости корабля
         if (ship_speed < 0)
             ship_speed = 0;
         if (ship_speed > 3)
             ship_speed = 3;
 
+        //"Двигатель" корабля
         ship_x -= sin(ship_angle*M_PI/180.0)*ship_speed;
         ship_y -= cos(ship_angle*M_PI/180.0)*ship_speed;
 
+        // ограничение корабля по поворотам
         if (ship_angle >= 360) 
             ship_angle -=360;
         if (ship_angle <= -360)
             ship_angle +=360;
 
+        //счетчик дл анимации воды
         if(count_w > 120)
             count_w = 1;
         
@@ -388,7 +496,7 @@ int main() {
             Mix_PlayChannel(-1, trashM, 0);
         }
 
-       if(SDL_HasIntersection(&rec, &torpeda1_rec) == SDL_TRUE || SDL_HasIntersection(&rec, &mine1_rec) == SDL_TRUE || 
+        if(SDL_HasIntersection(&rec, &torpeda1_rec) == SDL_TRUE || SDL_HasIntersection(&rec, &mine1_rec) == SDL_TRUE || 
             SDL_HasIntersection(&rec, &mine2_rec) == SDL_TRUE || SDL_HasIntersection(&rec, &mine3_rec) == SDL_TRUE || 
             SDL_HasIntersection(&rec, &mine4_rec) == SDL_TRUE || SDL_HasIntersection(&rec, &mine5_rec) == SDL_TRUE) {
             lives--;
@@ -423,13 +531,32 @@ int main() {
         while(SDL_PollEvent(&event))
         {
 
-            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode)
+            if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
+                menu_up_down % 2 == 0)
             {
                 start = 0;
             }
+            else if (event.type == SDL_KEYDOWN && SDL_SCANCODE_RETURN == event.key.keysym.scancode && 
+                menu_up_down % 2 != 0)
+            {
+                start = 0;
+                running = 0;
+            }
+            if ((event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) || 
+                (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode))
+            {
+                menu_up_down++;
+            }
         }
-        SDL_BlitSurface(go_m1, NULL, surface, &go1_rect);
-        SDL_UpdateWindowSurface(window);
+        if(menu_up_down % 2 == 0)
+            {
+                SDL_BlitSurface(go_m1, NULL, surface, &go1_rect);
+            }
+            else
+            {
+                SDL_BlitSurface(go_m2, NULL, surface, &go2_rect);
+            }
+            SDL_UpdateWindowSurface(window);
     }
 
     // free memory
@@ -443,3 +570,4 @@ int main() {
     SDL_Quit();
     return (0);
 }
+

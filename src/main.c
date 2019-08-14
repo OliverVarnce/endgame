@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include "SDL2_image/SDL_image.h"
+#include "SDL2_mixer/SDL_mixer.h"
 #include "SDL2_rotozoom.h"
 #include "SDL2_ttf/SDL_ttf.h"
 #include "header.h"
@@ -132,6 +133,10 @@ int main() {
 
     SDL_Init(SDL_INIT_EVERYTHING);
 
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+    Mix_Music *backgroundSound = Mix_LoadMUS("resources/0013.mp3");
+
+
     TTF_Init();
     char buff[3];
     char *score_string;
@@ -151,6 +156,7 @@ int main() {
     SDL_Surface *img4 = IMG_Load("./resources/water/4.jpg");
 
     SDL_Surface *ship = IMG_Load("./resources/ship.png"); // Эта функция загружвет изображение с любым расширением
+    SDL_Surface *ripple = IMG_Load("./resources/ripple.png");
 
     SDL_Surface *mine1 = IMG_Load("./resources/mine.png");
     SDL_Surface *mine2 = IMG_Load("./resources/mine.png");
@@ -167,11 +173,14 @@ int main() {
     SDL_Surface *lives2 = IMG_Load("./resources/lives.png");
     SDL_Surface *lives3 = IMG_Load("./resources/lives.png");
 
-    SDL_Surface *pause_m1 = IMG_Load("./resources/pause1.jpg");
-    SDL_Surface *pause_m2 = IMG_Load("./resources/pause2.jpg");
+    SDL_Surface *pause_m1 = IMG_Load("./resources/Pause_RG.jpg");
+    SDL_Surface *pause_m2 = IMG_Load("./resources/Pause_QT.jpg");
 
-    SDL_Surface *start_m1 = IMG_Load("./resources/stat_quit1.jpg");
-    SDL_Surface *start_m2 = IMG_Load("./resources/stat_quit2.jpg");
+    SDL_Surface *start_m1 = IMG_Load("./resources/Head_NG.jpg");
+    SDL_Surface *start_m2 = IMG_Load("./resources/Head_QT.jpg");
+
+    SDL_Surface *go_m1 = IMG_Load("./resources/Game_Over_NG.jpg");
+    SDL_Surface *go_m2 = IMG_Load("./resources/Game_Over_QT.jpg");
 
     //начальное положение текстур на карте
     SDL_Rect rect = {0, 0, 0, 0}; // создаем прямоугольник с картинкой, которую будем вставлять. Первые две переменные x,y это начальные точки на экране  {x, y, h, w}
@@ -182,6 +191,7 @@ int main() {
 
     SDL_Rect txt = {1800, 20, 0, 0};
     SDL_Rect txt2 = {1650, 20, 0, 0};
+
     SDL_Rect lives1_rect = {20, 20, 0, 0};
     SDL_Rect lives2_rect = {50, 20, 0, 0};
     SDL_Rect lives3_rect = {80, 20, 0, 0};
@@ -192,11 +202,21 @@ int main() {
     SDL_Rect start1_rect = {0, 0, 0, 0};
     SDL_Rect start2_rect = {0, 0, 0, 0};
 
+    SDL_Rect go1_rect = {0, 0, 0, 0};
+    SDL_Rect go2_rect = {0, 0, 0, 0};
+
+
     if (NULL == window)
         exit (1);
 
+    Mix_PlayMusic(backgroundSound, -1);
+
+
     while(start)
     {
+
+
+
         while(SDL_PollEvent(&event))
         {
 
@@ -225,11 +245,21 @@ int main() {
                 SDL_BlitSurface(start_m2, NULL, surface, &start2_rect);
             }
             SDL_UpdateWindowSurface(window);
+
         }
 
     }
-    start = 1;
-    
+	Mix_CloseAudio();
+ 
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+    Mix_Music *gameSound = Mix_LoadMUS("resources/game.mp3");
+    Mix_Chunk *trashM = Mix_LoadWAV("resources/trash.mp3");
+    if(running != 0){
+    	start = 1;
+    	Mix_PlayMusic(gameSound, -1);
+    }
+	
+
     while (running)
     {
         // обработка нажатий клавиш
@@ -238,7 +268,7 @@ int main() {
             if((SDL_QUIT == event.type) || (SDL_KEYDOWN == event.type && SDL_SCANCODE_ESCAPE == event.key.keysym.scancode))
                 running = 0;
             if (event.type == SDL_KEYDOWN && SDL_SCANCODE_UP == event.key.keysym.scancode) {
-                ship_speed = ship_speed + 0.2;
+                ship_speed = ship_speed + 0.2; 
             }
             if (event.type == SDL_KEYDOWN && SDL_SCANCODE_DOWN == event.key.keysym.scancode) {
                 ship_speed = ship_speed - 0.5;
@@ -284,7 +314,6 @@ int main() {
                 }
             }
         }
-
         // ограничение скорости корабля
         if (ship_speed < 0)
             ship_speed = 0;
@@ -310,6 +339,12 @@ int main() {
         SDL_Rect rec ={(int)ship_x,(int)ship_y,0,0}; //центровка корабля
         rec.x -= rotatedimage->w/2 - ship->w/2;
         rec.y -= rotatedimage->h/2 - ship->h/2;
+
+        //ripple
+        SDL_Surface * rotated_ripple = rotozoomSurface(ripple, ship_angle, 1.0,0);
+        SDL_Rect ripple_rec ={(int)ship_x,(int)ship_y,0,0}; //центровка wave
+        ripple_rec.x -= rotated_ripple->w/2 - ship->w/2;
+        ripple_rec.y -= rotated_ripple->h/2 - ship->h/2;
 
         // mine1
         SDL_Surface * rotated_mine1 = rotozoomSurface(mine1, mine1_angle, 1.0,0);
@@ -406,6 +441,10 @@ int main() {
         
 
         count_w++;
+       
+
+        if(ship_speed > 0)
+            SDL_BlitSurface(rotated_ripple, NULL, surface, &ripple_rec);
 
         SDL_BlitSurface(rotatedimage, NULL, surface, &rec);
         
@@ -437,6 +476,7 @@ int main() {
             respawn_trash(&t);
             score++;
             text = refresh_score(text, score);
+            Mix_PlayChannel(-1, trashM, 0);
         }
         //trash 2
         if(SDL_HasIntersection(&rec, &trash1_rec) == SDL_TRUE)
@@ -444,6 +484,7 @@ int main() {
             respawn_trash(&trash1_rec);
             score++;
             text = refresh_score(text, score);
+            Mix_PlayChannel(-1, trashM, 0);
         }
         // trash 3
         if(SDL_HasIntersection(&rec, &trash2_rec) == SDL_TRUE)
@@ -451,6 +492,7 @@ int main() {
             respawn_trash(&trash2_rec);
             score++;
             text = refresh_score(text, score);
+            Mix_PlayChannel(-1, trashM, 0);
         }
 
         if(SDL_HasIntersection(&rec, &torpeda1_rec) == SDL_TRUE || SDL_HasIntersection(&rec, &mine1_rec) == SDL_TRUE || 
@@ -463,9 +505,7 @@ int main() {
                 lives2_rect.x = 2000;
             if (lives == 0)
             {
-
-                running = 0;
-                
+                running = 0;   
             }
             ship_x = 900;
             ship_y = 400;
@@ -474,9 +514,10 @@ int main() {
 
         TTF_CloseFont(Sans);
         Sans = NULL;
-        // SDL_FreeSurface(torpeda1);
-        // torpeda1 = NULL;
 
+         //SDL_FreeSurface(torpeda1);
+        // torpeda1 = NULL;
+    
     }
     
     while(start)
@@ -500,20 +541,23 @@ int main() {
             {
                 menu_up_down++;
             }
-            if(menu_up_down % 2 == 0)
+        }
+        if(menu_up_down % 2 == 0)
             {
-                SDL_BlitSurface(start_m1, NULL, surface, &start1_rect);
+                SDL_BlitSurface(go_m1, NULL, surface, &go1_rect);
             }
             else
             {
-                SDL_BlitSurface(start_m2, NULL, surface, &start2_rect);
+                SDL_BlitSurface(go_m2, NULL, surface, &go2_rect);
             }
             SDL_UpdateWindowSurface(window);
-        }
-
     }
 
     // free memory
+    Mix_FreeMusic(backgroundSound);
+    Mix_FreeChunk(trashM);
+    Mix_FreeMusic(gameSound);
+    Mix_CloseAudio();
     SDL_DestroyWindow(window);
     TTF_Quit();
     SDL_Quit();

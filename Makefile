@@ -11,8 +11,10 @@ CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic -fsanitize=address -g \
 		 -framework SDL2_ttf \
 	 	 -rpath inc/framework -framework SDL2 \
 	 	 					  -framework SDL2_image \
+	 	 					  -framework SDL2_mixer \
 		-I inc/framework/SDL2_image.framework/Headers \
-		-I inc/framework/SDL2_ttf.framework/Headers 
+		-I inc/framework/SDL2_ttf.framework/Headers \
+		-I inc/framework/SDL2_mixer.framework/Headers
 
 all: $(NAME)
 
